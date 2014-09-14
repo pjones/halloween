@@ -12,7 +12,7 @@ static const int PIN_STATUS_LED_BLUE = 11;
 
 // #############################################################################
 // The ultrasonic range finder.
-static const int PIN_RANGE_FINDER = 3;
+static const int PIN_RANGE_FINDER = 0;
 
 // #############################################################################
 // The solenoid which opens the air stream.
@@ -83,15 +83,17 @@ void set_led_color (struct color_t color);
 // Run once.
 void setup()
 {
-    pinMode(PIN_RANGE_FINDER, INPUT);
-
     pinMode(PIN_SOLENOID, OUTPUT);
     digitalWrite(PIN_SOLENOID, LOW);
 
     pinMode(PIN_RANGE_LED, OUTPUT);
     digitalWrite(PIN_RANGE_LED, LOW);
 
-//    Serial.begin(9600);
+    // Wait for the range finder to start taking readings.
+    delay(20);
+
+    // For debugging.
+    // Serial.begin(9600);
 }
 
 // #############################################################################
@@ -121,10 +123,10 @@ TriggerState::TriggerState (void)
 // #############################################################################
 void TriggerState::check (void)
 {
-    unsigned long pulse = pulseIn(PIN_RANGE_FINDER, HIGH);
+    unsigned long distance = analogRead(PIN_RANGE_FINDER) * 5;
     unsigned long now = millis();
 
-    indicate_distance(pulse <= TRIGGER_DISTANCE);
+    indicate_distance(distance <= TRIGGER_DISTANCE);
 
     switch (m_state) {
     case STATE_FIRING:
@@ -144,7 +146,7 @@ void TriggerState::check (void)
         }
         break;
     case STATE_READY:
-        if (pulse <= TRIGGER_DISTANCE) {
+        if (distance <= TRIGGER_DISTANCE) {
             start_fire();
             m_state = STATE_FIRING;
             m_last_event = now;
@@ -170,10 +172,10 @@ void TriggerState::stop_fire (void)
 void TriggerState::update_inactive_indicator (unsigned long duration) {
     if (duration == 0) {
         m_inactive_color = COLOR_INACTIVE;
-    } else if (INACTIVE_TIME_MILLIS / duration % 2 == 0) {
-        if (m_inactive_color.color_red   > 0) --m_inactive_color.color_red;
-        if (m_inactive_color.color_green > 0) --m_inactive_color.color_green;
-        if (m_inactive_color.color_blue  > 0) --m_inactive_color.color_blue;
+    } else if (duration % 1000 == 0) {
+        if (m_inactive_color.color_red   >   0) --m_inactive_color.color_red;
+        if (m_inactive_color.color_green >   0) --m_inactive_color.color_green;
+        if (m_inactive_color.color_blue  < 255) ++m_inactive_color.color_blue;
     }
 
     set_led_color(m_inactive_color);
