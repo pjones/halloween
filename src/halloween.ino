@@ -24,7 +24,7 @@ static const int PIN_RANGE_LED = 13;
 
 // #############################################################################
 // Length of time to spray air.
-static const unsigned long FIRE_TIME_MILLIS = 350;
+static const unsigned long FIRE_TIME_MILLIS = 250;
 
 // #############################################################################
 // Length of time to remain inactive after spraying air.
@@ -32,7 +32,7 @@ static const unsigned long INACTIVE_TIME_MILLIS = 30000;
 
 // #############################################################################
 // Distance in millimeters to trigger the air spray;
-static const unsigned long TRIGGER_DISTANCE = 1000;
+static const unsigned long TRIGGER_DISTANCE = 4200;
 
 // #############################################################################
 enum states_t {
@@ -93,7 +93,9 @@ void setup()
     delay(20);
 
     // For debugging.
-    // Serial.begin(9600);
+#  ifdef DEBUG
+    Serial.begin(9600);
+#  endif
 }
 
 // #############################################################################
@@ -125,6 +127,10 @@ void TriggerState::check (void)
 {
     unsigned long distance = analogRead(PIN_RANGE_FINDER) * 5;
     unsigned long now = millis();
+
+#  ifdef DEBUG
+    Serial.println(distance);
+#  endif
 
     indicate_distance(distance <= TRIGGER_DISTANCE);
 
