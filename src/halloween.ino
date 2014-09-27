@@ -11,16 +11,12 @@ static const int PIN_STATUS_LED_GREEN = 10;
 static const int PIN_STATUS_LED_BLUE = 11;
 
 // #############################################################################
-// The ultrasonic range finder.
-static const int PIN_RANGE_FINDER = 0;
-
-// #############################################################################
 // The solenoid which opens the air stream.
 static const int PIN_SOLENOID = 2;
 
 // #############################################################################
 // The secondary "within range" indicator LED.
-static const int PIN_RANGE_LED = 13;
+static const int PIN_IR_BEAM = 13;
 
 // #############################################################################
 // Length of time to spray air.
@@ -29,10 +25,6 @@ static const unsigned long FIRE_TIME_MILLIS = 250;
 // #############################################################################
 // Length of time to remain inactive after spraying air.
 static const unsigned long INACTIVE_TIME_MILLIS = 30000;
-
-// #############################################################################
-// Distance in millimeters to trigger the air spray;
-static const unsigned long TRIGGER_DISTANCE = 4200;
 
 // #############################################################################
 enum states_t {
@@ -61,7 +53,6 @@ public:
     void stop_fire (void);
     void update_inactive_indicator (unsigned long duration);
     void return_to_ready (void);
-    void indicate_distance (bool in_range);
 private:
     unsigned long m_last_event;
     enum states_t m_state;
@@ -85,12 +76,6 @@ void setup()
 {
     pinMode(PIN_SOLENOID, OUTPUT);
     digitalWrite(PIN_SOLENOID, LOW);
-
-    pinMode(PIN_RANGE_LED, OUTPUT);
-    digitalWrite(PIN_RANGE_LED, LOW);
-
-    // Wait for the range finder to start taking readings.
-    delay(20);
 
     // For debugging.
 #  ifdef DEBUG
@@ -125,14 +110,12 @@ TriggerState::TriggerState (void)
 // #############################################################################
 void TriggerState::check (void)
 {
-    unsigned long distance = analogRead(PIN_RANGE_FINDER) * 5;
+    int beam_status = digitalRead(PIN_IR_BEAM);
     unsigned long now = millis();
 
 #  ifdef DEBUG
     Serial.println(distance);
 #  endif
-
-    indicate_distance(distance <= TRIGGER_DISTANCE);
 
     switch (m_state) {
     case STATE_FIRING:
@@ -152,7 +135,7 @@ void TriggerState::check (void)
         }
         break;
     case STATE_READY:
-        if (distance <= TRIGGER_DISTANCE) {
+        if (beam_status == LOW) {
             start_fire();
             m_state = STATE_FIRING;
             m_last_event = now;
@@ -190,9 +173,4 @@ void TriggerState::update_inactive_indicator (unsigned long duration) {
 // #############################################################################
 void TriggerState::return_to_ready (void) {
     set_led_color(COLOR_READY);
-}
-
-// #############################################################################
-void TriggerState::indicate_distance (bool in_range) {
-    digitalWrite(PIN_RANGE_LED, in_range ? HIGH : LOW);
 }
