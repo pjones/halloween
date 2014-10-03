@@ -1,14 +1,14 @@
 // #############################################################################
 // The inactive status LED, color red pin.
-static const int PIN_STATUS_LED_RED = 9;
+static const int PIN_STATUS_LED_RED = 3;
 
 // #############################################################################
 // The inactive status LED, color green pin.
-static const int PIN_STATUS_LED_GREEN = 10;
+static const int PIN_STATUS_LED_GREEN = 5;
 
 // #############################################################################
 // The inactive status LED, color blue pin.
-static const int PIN_STATUS_LED_BLUE = 11;
+static const int PIN_STATUS_LED_BLUE = 6;
 
 // #############################################################################
 // The solenoid which opens the air stream.
@@ -16,7 +16,7 @@ static const int PIN_SOLENOID = 2;
 
 // #############################################################################
 // The secondary "within range" indicator LED.
-static const int PIN_IR_BEAM = 13;
+static const int PIN_IR_BEAM = 10;
 
 // #############################################################################
 // Length of time to spray air.
