@@ -15,8 +15,13 @@ static const int PIN_STATUS_LED_BLUE = 6;
 static const int PIN_SOLENOID = 2;
 
 // #############################################################################
-// The secondary "within range" indicator LED.
+// The signal from the IR beam.
 static const int PIN_IR_BEAM = 10;
+
+// #############################################################################
+// The remote trigger (for stuff like taking a picture and starting
+// the smoke machine).
+static const int PIN_REMOTE_TRIGGER = 13;
 
 // #############################################################################
 // Length of time to spray air.
@@ -25,6 +30,10 @@ static const unsigned long FIRE_TIME_MILLIS = 250;
 // #############################################################################
 // Length of time to remain inactive after spraying air.
 static const unsigned long INACTIVE_TIME_MILLIS = 30000;
+
+// #############################################################################
+// Length of time to raise the remote trigger high.
+static const unsigned long REMOTE_TRIGGER_MILLIS = 200;
 
 // #############################################################################
 enum states_t {
@@ -55,6 +64,7 @@ public:
     void return_to_ready (void);
 private:
     unsigned long m_last_event;
+    unsigned long m_remote_trigger;
     enum states_t m_state;
     struct color_t m_inactive_color;
 };
@@ -76,6 +86,9 @@ void setup()
 {
     pinMode(PIN_SOLENOID, OUTPUT);
     digitalWrite(PIN_SOLENOID, LOW);
+
+    pinMode(PIN_REMOTE_TRIGGER, OUTPUT);
+    digitalWrite(PIN_REMOTE_TRIGGER, LOW);
 
     // For debugging.
 #  ifdef DEBUG
@@ -101,6 +114,7 @@ void set_led_color (struct color_t color)
 // #############################################################################
 TriggerState::TriggerState (void)
     : m_last_event(0),
+      m_remote_trigger(0),
       m_state(STATE_READY),
       m_inactive_color(COLOR_INACTIVE)
 {
@@ -125,6 +139,12 @@ void TriggerState::check (void)
             m_state = STATE_INACTIVE;
             m_last_event = now;
         }
+        if (m_remote_trigger != 0 &&
+            now - m_remote_trigger >= REMOTE_TRIGGER_MILLIS)
+        {
+            digitalWrite(PIN_REMOTE_TRIGGER, LOW);
+            m_remote_trigger = 0;
+        }
         break;
     case STATE_INACTIVE:
         update_inactive_indicator(now - m_last_event);
@@ -137,8 +157,10 @@ void TriggerState::check (void)
     case STATE_READY:
         if (beam_status == LOW) {
             start_fire();
+            digitalWrite(PIN_REMOTE_TRIGGER, HIGH);
             m_state = STATE_FIRING;
             m_last_event = now;
+            m_remote_trigger = now;
         }
         break;
     }
