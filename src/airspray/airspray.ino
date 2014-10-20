@@ -29,7 +29,7 @@ static const unsigned long FIRE_TIME_MILLIS = 250;
 
 // #############################################################################
 // Length of time to remain inactive after spraying air.
-static const unsigned long INACTIVE_TIME_MILLIS = 30000;
+static const unsigned long INACTIVE_TIME_MILLIS = 5000;
 
 // #############################################################################
 // Length of time to raise the remote trigger high.
