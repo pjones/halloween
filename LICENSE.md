@@ -34,10 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # Included Works
 
 This repository contains symbols and source code that were not
-authored by this project's contributors.
-
-## Arduino Pro Mini Symbol
-
-Copyright (c) J. Bromley and released under the GPL.
-
-<https://github.com/jbromley/insect-bot/tree/master/schematics/symbols>
+authored by this project's contributors.  See the `README.md` file in
+the `design` directory, and the subdirectories under `lib` and
+`vendor` for further details.
